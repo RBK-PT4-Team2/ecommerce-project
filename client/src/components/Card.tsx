@@ -1,36 +1,76 @@
-import { useShoppingCart } from "../context/ShoppingCartContext";
+import React from "react";
+import { AiOutlineCloseCircle } from "react-icons/ai";
+import { FaRegSadCry } from "react-icons/fa";
+import { BiHappyHeartEyes } from "react-icons/bi";
+import CartCard from "./CartCard";
 import { formatCurrency } from "../utilities/formatCurrency";
+import storeItems from "../data/products.json";
 
-type ProductProps = {
+type CartItem = {
   id: number;
-  title: string;
-  price: number;
-  image_url: string;
   quantity: number;
+  title:string;
+  price:number;
+  image_url:string
 };
 
-const Card = ({ id, title, price, image_url, quantity }: ProductProps) => {
-  const { increaseCartQuantity } = useShoppingCart();
+type ShoppingCartProps = {
+  handleClickCart: () => void;
+  cartItems: CartItem[];
+};
+
+const Cart = ({ handleClickCart, cartItems }: ShoppingCartProps) => {
   return (
-    <div className="bg-white rounded shadow-sm">
-      <img src={image_url} alt={title} className="h-60  rounded-t" />
-      <div className="p-3">
-        <h2 className="title text-sm font-semibold">{title}</h2>
-        <div className="flex items-center justify-between">
-          <p className="text-green-600 text-xs font-bold">
-            {formatCurrency(price)}
-          </p>
-          <button
-            onClick={() => increaseCartQuantity(id)}
-            className="py-1 px-4 rounded bg-red-50 text-red-400 hover:bg-white duration-300"
-          >
-            Add to cart
-          </button>
-        </div>
-        <h4>{quantity}items on stock</h4>
+    <div className="fixed bottom-0 left-0 w-full h-full flex items-center justify-center z-9999">
+      <div className="relative w-1/2 bg-blue-200 shadow-xl p-3">
+        <button
+          onClick={() => handleClickCart()}
+          className="absolute top-3 right-3"
+        >
+          <AiOutlineCloseCircle />
+        </button>
+        <h1 className="text-center text-3xl font-semibold italic mb-2 text-orange-400">
+          your cart
+        </h1>
+        <hr />
+        {cartItems.length == 0 ? (
+          <>
+            <p className="text-center text-slate-500 mt-4 flex items-center justify-center">
+              Your cart is empty <FaRegSadCry className="ml-2" />
+            </p>
+            <div>
+              <button
+                onClick={() => handleClickCart()}
+                className="text-center mx-auto mt-4 flex items-center justify-center text-red-300 bg-red-50 px-4 py-1 rounded-lg hover:shadow-sm hover:bg-white duration-300"
+              >
+                Add some <BiHappyHeartEyes className="ml-2" />
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="mt-3 grid">
+              {cartItems.map((item) => (
+                <CartCard {...item} key={item.id} />
+              ))}
+            </div>
+            <strong className="float-left text-green-700">
+              Total:{" "}
+              {formatCurrency(
+                cartItems.reduce((total, cartItem) => {
+                  const item = storeItems.find((i) => i.id === cartItem.id);
+                  return total + (item?.price || 0) * cartItem.quantity;
+                }, 0)
+              )}
+            </strong>
+            <button className="py-1 float-right px-3 rounded bg-red-50 text-red-400 hover:shadow-sm hover:bg-white duration-300 font-semibold">
+              Checkout
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
 };
 
-export default Card;
+export default Cart;

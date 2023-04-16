@@ -16,6 +16,8 @@ const Login = () => {
         // Signed in
         const user = userCredential.user;
         navigate('/store');
+        setEmail('');
+        setPassword('');
         console.log(user);
       })
       .catch((error) => {
